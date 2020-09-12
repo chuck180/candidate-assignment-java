@@ -3,3 +3,9 @@
 /target/
 /.classpath
 /.factorypath
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
