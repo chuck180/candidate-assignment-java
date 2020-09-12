@@ -1,10 +1,12 @@
 package ch.aaap.assignment.model;
 
-public interface Canton {
+import lombok.Builder;
+import lombok.Value;
 
-  public String getCode();
+@Value
+@Builder
+public class Canton {
 
-  public String getName();
-
-  // TODO add more features here representing the relations
+  String code;
+  String name;
 }

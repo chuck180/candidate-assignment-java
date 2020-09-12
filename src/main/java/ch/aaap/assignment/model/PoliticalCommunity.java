@@ -2,15 +2,17 @@ package ch.aaap.assignment.model;
 
 import java.time.LocalDate;
 
-public interface PoliticalCommunity {
+import lombok.Builder;
+import lombok.Value;
 
-  public String getNumber();
+@Value
+@Builder
+public class PoliticalCommunity {
 
-  public String getName();
-
-  public String getShortName();
-
-  public LocalDate getLastUpdate();
-
-  // TODO add more features here representing the relations
+  String number;
+  String name;
+  String shortName;
+  LocalDate lastUpdate;
+  Canton canton;
+  District district;
 }

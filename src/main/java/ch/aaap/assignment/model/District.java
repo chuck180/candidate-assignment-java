@@ -1,10 +1,12 @@
 package ch.aaap.assignment.model;
 
-public interface District {
+import lombok.Builder;
+import lombok.Value;
 
-  public String getNumber();
+@Value
+@Builder
+public class District {
 
-  public String getName();
-
-  // TODO add more features here representing the relations
+  String number;
+  String name;
 }
