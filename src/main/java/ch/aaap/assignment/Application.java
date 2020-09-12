@@ -1,11 +1,14 @@
 package ch.aaap.assignment;
 
-import ch.aaap.assignment.model.Model;
+import ch.aaap.assignment.model.*;
 import ch.aaap.assignment.raw.CSVPoliticalCommunity;
 import ch.aaap.assignment.raw.CSVPostalCommunity;
 import ch.aaap.assignment.raw.CSVUtil;
 import java.time.LocalDate;
+import java.util.AbstractMap;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Application {
 
@@ -24,10 +27,83 @@ public class Application {
     Set<CSVPoliticalCommunity> politicalCommunities = CSVUtil.getPoliticalCommunities();
     Set<CSVPostalCommunity> postalCommunities = CSVUtil.getPostalCommunities();
 
-    // TODO implementation
-    throw new RuntimeException("Not yet implemented");
+    Set<District> districts = new HashSet<>();
+    Set<Canton> cantons = new HashSet<>();
+    Set<PoliticalCommunity> politicalCommunitiesSet = new HashSet<>();
+    Set<PostalCommunity> postalCommunitiesSet = new HashSet<>();
+
+    for (CSVPoliticalCommunity politicalCommunity : politicalCommunities) {
+      cantons.add(
+          Canton.builder()
+              .name(politicalCommunity.getCantonName())
+              .code(politicalCommunity.getCantonCode())
+              .build());
+      districts.add(
+          District.builder()
+              .name(politicalCommunity.getDistrictName())
+              .number(politicalCommunity.getDistrictNumber())
+              .build());
+    }
+
+    politicalCommunities.forEach(
+        pc -> {
+          politicalCommunitiesSet.add(
+              PoliticalCommunity.builder()
+                  .name(pc.getName())
+                  .number(pc.getNumber())
+                  .shortName(pc.getShortName())
+                  .lastUpdate(pc.getLastUpdate())
+                  .canton(
+                      cantons.stream()
+                          .filter(c -> c.getCode().equals(pc.getCantonCode()))
+                          .findFirst()
+                          .orElse(null))
+                  .district(
+                      districts.stream()
+                          .filter(d -> d.getNumber().equals(pc.getDistrictNumber()))
+                          .findFirst()
+                          .orElse(null))
+                  .build());
+        });
+
+    postalCommunities.stream()
+        .collect(
+            Collectors.groupingBy(
+                po ->
+                    new AbstractMap.SimpleImmutableEntry<>(
+                        po.getZipCode(), po.getZipCodeAddition())))
+        .forEach(
+            (zipEntry, pcList) ->
+                postalCommunitiesSet.add(
+                    PostalCommunity.builder()
+                        .name(pcList.get(0).getName())
+                        .zipCode(pcList.get(0).getZipCode())
+                        .zipCodeAddition(pcList.get(0).getZipCodeAddition())
+                        .politicalCommunities(
+                            politicalCommunitiesSet.stream()
+                                .filter(
+                                    pc ->
+                                        pcList.stream()
+                                            .map(CSVPostalCommunity::getPoliticalCommunityNumber)
+                                            .collect(Collectors.toList())
+                                            .contains(pc.getNumber()))
+                                .collect(Collectors.toList()))
+                        .build()));
+
+    model =
+        Model.builder()
+            .cantons(cantons)
+            .districts(districts)
+            .politicalCommunities(politicalCommunitiesSet)
+            .postalCommunities(postalCommunitiesSet)
+            .build();
   }
-  /** @return model */
+
+  /**
+   * Gets the {@link Model} and returns it
+   *
+   * @return {@link Model}
+   */
   public Model getModel() {
     return model;
   }
